@@ -1,0 +1,4 @@
+langchain_openai>=0.0.5
+python-dotenv>=1.0.0
+browser_use>=0.1.0
+langchain-google-genai>=2.1.4
