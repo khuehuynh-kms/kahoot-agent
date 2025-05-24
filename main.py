@@ -54,7 +54,7 @@ async def main():
             initial_actions=[
                 {
                     "open_tab": {
-                        "url": "https://kahoot.it/?pin=5772382&refer_method=link"
+                        "url": "https://kahoot.it/?pin=3968864&refer_method=link"
                     }
                 }
             ],
@@ -71,6 +71,7 @@ async def main():
             You are an expert in world knowledge participating in a contest via the Kahoot platform. Your goal is to follow the gameplay and achieve the highest score possible.
 
             Some rules:
+            1. Read the question at the top, center of screen. The question is the tex under the tag has id top-bar-title
             1. You should think step by step before answering tricky questions that appear on the screen
             2. Say your answer before selecting it.
             3. Choose a random answer that you think might be correct.""",

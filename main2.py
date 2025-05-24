@@ -20,10 +20,14 @@ load_dotenv()
 kahootLink = os.getenv("KAHOOT_LINK")
 
 # Initialize the model with better configuration
-llm = ChatGoogleGenerativeAI(
-    model='gemini-2.0-flash-exp',
-    temperature=0.1,  # Lower temperature for more consistent responses
-    max_tokens=2048
+# llm = ChatGoogleGenerativeAI(
+#     model='gemini-2.0-flash-exp',
+#     temperature=0.1,  # Lower temperature for more consistent responses
+#     max_tokens=2048
+# )
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature=0.0,
 )
 
 # Helper function to extract URLs from text
@@ -65,10 +69,24 @@ async def main():
                 3. Click on the input field and clear any existing text
                 4. Type the nickname '{KahootConfig.NICKNAME}' exactly
                 5. Look for and click the "Join" or "Enter" button to join the game
-                6. Wait for the page to load and observe the screen state after joining:
-                   - "Waiting for host to start" screen → Report this and wait patiently
-                   - Question already visible → Report this immediately 
-                   - Error messages (invalid pin, game full, etc.) → Report the specific error
+                6. After joining, observe the current screen state:
+                
+                IF YOU SEE "WAITING FOR HOST TO START" OR SIMILAR:
+                - Take a screenshot and report "Waiting for game to start"
+                - STAY ON THIS PAGE and keep monitoring
+                - DO NOT exit or finish the task yet
+                - Keep checking every few seconds for changes
+                - Wait until you see the first question with colored answer buttons
+                
+                IF YOU SEE A QUESTION WITH ANSWER BUTTONS:
+                - Take a screenshot
+                - Report "First question is now visible - ready to start answering"
+                - Your job is complete - the game agent will take over
+                
+                IF YOU SEE ERROR MESSAGES:
+                - Take a screenshot
+                - Report the specific error (invalid pin, game full, etc.)
+                - Do not proceed further
                 
                 IMPORTANT: 
                 - Take a screenshot after successfully joining to document the state
@@ -84,125 +102,34 @@ async def main():
             await run_agent_with_retry(initAgent)
             logger.info("Login phase completed. Starting main game agent...")
             
-            # Enhanced main game agent with improved question handling
-            gameAgent = Agent(
-                task="""
-                You are participating in a Kahoot quiz. Your goal is to answer questions correctly and achieve high scores.
+            answerAgent = Agent(
+                task=""""
+                You are an expert in world knowledge participating in a contest via the Kahoot platform. Your goal is to follow the gameplay and achieve the highest score possible.
 
-                SCREEN STATE RECOGNITION & ACTIONS:
-                
-                🔍 QUESTION SCREEN (Action Required):
-                - You'll see a question at the top of the screen
-                - Below are 2-4 colored answer buttons (typically red, blue, yellow, green)
-                - Each answer button has both a color/shape and text
-                - There's usually a countdown timer
-                - ACTION: You MUST click on one of the colored answer buttons
-                
-                ⏳ RESULT SCREEN (Wait Only):
-                - Shows "Correct!" (green) or "Incorrect" (red) 
-                - May show points earned, streak info, and correct answer
-                - ACTION: Wait patiently - do NOT click anything
-                
-                📊 SCOREBOARD/LEADERBOARD (Wait Only):
-                - Shows player rankings, names, and scores
-                - Usually appears between questions
-                - ACTION: Wait patiently - do NOT click anything
-                
-                🎯 QUESTION ANSWERING STRATEGY:
-                
-                CRITICAL: When you see a question screen, you MUST click on one of the answer buttons. Here's how:
-                
-                1. READ THE QUESTION: Parse the question text at the top carefully
-                
-                2. IDENTIFY ANSWER BUTTONS: Look for the colored answer buttons (usually 2-4 options)
-                   - Red button (triangle) - typically top-left
-                   - Blue button (diamond) - typically top-right  
-                   - Yellow button (circle) - typically bottom-left
-                   - Green button (square) - typically bottom-right
-                
-                3. DECISION PROCESS:
-                   - If you know the answer: Click the button with the correct answer text
-                   - If you're uncertain but have an educated guess: Click your best guess
-                   - If you don't know at all: Click the RED button (top-left, triangle shape)
-                
-                4. HOW TO CLICK:
-                   - Look for the button that contains your chosen answer text
-                   - Click directly on that colored button/shape
-                   - The button should highlight or change when clicked
-                   - Do NOT click on text alone - click on the actual colored button area
-                
-                5. FALLBACK RULE (VERY IMPORTANT):
-                   - If you're completely unsure: ALWAYS click the RED button (triangle, usually top-left)
-                   - If you can't identify the red button: Click the first/top-left answer option
-                   - Never spend too much time deciding - quick decision is better than timing out
-                
-                6. AFTER CLICKING:
-                   - Immediately STOP taking actions after clicking an answer
-                   - Wait for the result screen to appear
-                   - Do NOT click during result or scoreboard screens
-                   - Only take action again when a new question appears
-                
-                TECHNICAL CLICKING INSTRUCTIONS:
-                - In Kahoot, answers are presented as large colored buttons/shapes
-                - Each button has both a geometric shape and answer text
-                - Click on the entire button area, not just the text
-                - The buttons are usually quite large and easy to click
-                - If a button doesn't respond, try clicking in the center of the button
-                
-                ERROR HANDLING:
-                - If you see "Time's up" or timer expires: Wait for next question
-                - If buttons don't seem clickable: Try refreshing or report the issue
-                - If game disconnects: Report the disconnection
-                - If you're unsure what screen you're on: Describe what you see
-                
-                TIMING RULES:
-                - Answer quickly - Kahoot rewards speed
-                - Don't spend more than 10-15 seconds analyzing
-                - If unsure after quick analysis: Default to RED button
-                - Speed + participation is better than perfect accuracy
-                
-                Remember: Your primary job is to CLICK answer buttons when questions appear. Everything else is waiting.
+                Some rules:
+                You are playing Kahoot. Follow these steps:
+                1. Read the question text, which is displayed on a white background.
+                2. Determine the correct answer based on the question.
+                3. There are four answer options:
+                  - The first answer has a red background.
+                  - The second answer has a blue background.
+                  - The third answer has a yellow background.
+                  - The fourth answer has a green background.
+                4. Identify the correct answer among the four options.
+                5. Choose the matching answer by clicking the corresponding colored option.
+                6. Wait for the next question to appear, then repeat from step 1.
                 """,
                 browser_context=context,
                 llm=llm,
-                use_vision=True,
-                save_conversation_path="logs/game_conversation",
+                use_vision=False,
+                save_conversation_path="logs/answering",
             )
 
             # Run the main game with retry logic
-            await run_agent_with_retry(gameAgent)
+            await run_agent_with_retry(answerAgent)
             
             logger.info("Game completed. Capturing final results...")
             
-            # Enhanced results capture agent
-            resultsAgent = Agent(
-                task="""
-                Capture and analyze the final Kahoot game results:
-                
-                INFORMATION TO GATHER:
-                1. Final score/points earned
-                2. Final leaderboard position (1st, 2nd, 3rd, etc.)
-                3. Number of correct vs incorrect answers
-                4. Any achievements or badges earned
-                5. Overall game statistics if visible
-                
-                ACTIONS TO TAKE:
-                1. Take a screenshot of the final results screen
-                2. Look for detailed statistics page if available
-                3. Report all gathered information clearly
-                4. Note if the bot achieved top 3 position
-                5. Report the final nickname used and total points
-                
-                If the game is still in progress or results aren't visible yet, 
-                wait briefly and check again.
-                """,
-                browser_context=context,
-                llm=llm,
-                use_vision=True,
-                save_conversation_path="logs/results_conversation",
-            )
-            
-            await run_agent_with_retry(resultsAgent, max_retries=2)
             logger.info("Kahoot session completed successfully!")
             
     except Exception as e:

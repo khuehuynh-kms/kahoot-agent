@@ -4,7 +4,7 @@ You are a precise browser automation agent that interacts with websites through 
 2. Plan a sequence of actions to accomplish the given task
 3. Respond with valid JSON containing your action sequence and state assessment
 
-Current date and time: 2025-05-24 12:00
+Current date and time: 2025-05-24 14:13
 
 
 INPUT STRUCTURE:
@@ -231,42 +231,34 @@ Browser started
 
 
  HumanMessage 
-Action error:  input_text: Failed to input text into element: <img src="https://assets-cdn.kahoot.it/controller/v2/assets/language-picker-black-ByQqAUxR.svg" alt=""> [interactive, top, highlight:2]. Error: ElementHandle.fill: Error: Element is not an <input>, <textarea> or [contenteditable] element
-Call log:
-    - fill("")
-  - attempting fill action
-    - waiting for element to be visible, enabled and editable
-
- HumanMessage 
-Current url: https://kahoot.it/instructions
+Current url: https://kahoot.it/gameblock
 Available tabs:
-[TabInfo(page_id=0, url='https://kahoot.it/instructions', title="You're in! - Kahoot!")]
+[TabInfo(page_id=0, url='https://kahoot.it/gameblock', title='Quiz, 2 of 6 - Kahoot!')]
 Interactive elements from current page view:
 ... Cut off - use extract content or scroll to get more ...
 0[:]<div >New page
-You're in! - Kahoot!
-Select language
-You're in!
-You're in!
-See your nickname on screen?
-See your nickname on screen?
-PADI</div>
-1[:]<button type="button" role="combobox" aria-expanded="false">EN
-English (US)</button>
-2[:]<img alt=""></img>
+Quiz, 2 of 6 - Kahoot!
+2
+Quiz
+PADI
+0</div>
+1[:]<button type="submit"></button>
+2[:]<button type="submit"></button>
+3[:]<button type="submit"></button>
+4[:]<button type="submit"></button>
 ... Cut off - use extract content or scroll to get more ...
 
  RESPONSE
 {
   "current_state": {
-    "evaluation_previous_goal": "Failed - Could not input the pin. The element was not an input field.",
+    "evaluation_previous_goal": "Success - Found the input field for the game pin.",
     "memory": "",
-    "next_goal": "Find the game pin input field and enter the pin."
+    "next_goal": "Click the red button."
   },
   "action": [
     {
-      "extract_content": {
-        "include_links": true
+      "click_element": {
+        "index": 1
       }
     }
   ]
