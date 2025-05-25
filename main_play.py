@@ -115,9 +115,10 @@ async def main():
                   - The second answer has a blue background.
                   - The third answer has a yellow background.
                   - The fourth answer has a green background.
-                4. Identify the correct answer among the four options.
-                5. Choose the matching answer by clicking the corresponding colored option.
-                6. Wait for the next question to appear, then repeat from step 1.
+                4. Log the question and answers to track.
+                5. Identify the correct answer among the four options.
+                6. Choose the matching answer by clicking the corresponding colored option.
+                7. Wait for the next question to appear, then repeat from step 1.
                 """,
                 browser_context=context,
                 llm=llm,
